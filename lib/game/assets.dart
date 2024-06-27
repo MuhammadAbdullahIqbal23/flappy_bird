@@ -16,6 +16,6 @@ class Assets {
   static const message = 'assets/images/message.png';
 
   static const flying = 'fly.wav';
-  static const collision = 'collision.wav';
+  static const collision = 'gta-v-death-sound-effect-102.mp3';
   static const point = 'point.wav';
 }
