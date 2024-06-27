@@ -7,7 +7,6 @@ import 'package:flappy_bird/game/FlappyBirdGame.dart';
 import 'package:flappy_bird/game/assets.dart';
 import 'package:flappy_bird/game/configuration.dart';
 import 'package:flappy_bird/game/pipe_position.dart';
-import 'package:flutter/material.dart';
 
 class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
   final Difficulty difficulty;
@@ -25,18 +24,19 @@ class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
 
     switch (difficulty) {
       case Difficulty.easy:
-        spacing = 170;
+        spacing = 200;
         break;
       case Difficulty.medium:
-        spacing = 150 + _random.nextDouble() * 20;
+        spacing = 160;
         break;
       case Difficulty.hard:
-        spacing = 130 + _random.nextDouble() * 20;
+        spacing = 120;
         break;
     }
 
     final centerY =
         spacing + _random.nextDouble() * (heightMinusGround - spacing);
+
     addAll([
       Pipe(
         height: centerY - spacing / 2,
@@ -57,12 +57,11 @@ class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
 
     if (position.x < -10) {
       removeFromParent();
-      debugPrint('removed');
       updateScore();
     }
-    if (game.isHit) {
+    if (gameRef.isHit) {
       removeFromParent();
-      game.isHit = false;
+      gameRef.isHit = false;
       gameRef.bird.score = 0;
     }
   }
