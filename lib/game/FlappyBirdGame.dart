@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable, file_names
-
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -9,23 +7,28 @@ import 'package:flappy_bird/components/bird.dart';
 import 'package:flappy_bird/components/ground.dart';
 import 'package:flappy_bird/components/pipe_group.dart';
 import 'package:flappy_bird/game/configuration.dart';
+import 'package:flappy_bird/screens/main_menu_screen.dart';
 import 'package:flutter/material.dart';
+
+enum Difficulty { easy, medium, hard }
 
 class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
   late Bird bird;
   late TextComponent score;
   Timer interval = Timer(Config.pipeInterval, repeat: true);
   bool isHit = false;
+  Difficulty difficulty = Difficulty.easy;
+
   @override
   Future<void> onLoad() async {
     addAll([
       Background(),
       Ground(),
       bird = Bird(),
-      PipeGroup(),
       score = buildScore(),
     ]);
-    interval.onTick = () => add(PipeGroup());
+    interval.onTick = () => add(PipeGroup(difficulty: difficulty));
+    overlays.add(MainMenuScreen.id);
   }
 
   @override

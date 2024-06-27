@@ -6,6 +6,7 @@ class MainMenuScreen extends StatelessWidget {
   final FlappyBirdGame game;
   static const String id = 'mainMenu';
   const MainMenuScreen({super.key, required this.game});
+
   @override
   Widget build(BuildContext context) {
     game.pauseEngine();
@@ -24,7 +25,44 @@ class MainMenuScreen extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          child: Image.asset(Assets.message),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Flappy Bird',
+                  style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    game.difficulty = Difficulty.easy;
+                    game.overlays.remove('mainMenu');
+                    game.resumeEngine();
+                  },
+                  child: const Text('Easy'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    game.difficulty = Difficulty.medium;
+                    game.overlays.remove('mainMenu');
+                    game.resumeEngine();
+                  },
+                  child: const Text('Medium'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    game.difficulty = Difficulty.hard;
+                    game.overlays.remove('mainMenu');
+                    game.resumeEngine();
+                  },
+                  child: const Text('Hard'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
