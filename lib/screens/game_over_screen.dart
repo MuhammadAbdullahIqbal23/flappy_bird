@@ -1,11 +1,14 @@
 import 'package:flappy_bird/game/FlappyBirdGame.dart';
 import 'package:flappy_bird/game/assets.dart';
+import 'package:flappy_bird/screens/main_menu_screen.dart';
 import 'package:flutter/material.dart';
 
 class GameOverScreen extends StatelessWidget {
   final FlappyBirdGame game;
   static const String id = 'gameOver';
+
   const GameOverScreen({super.key, required this.game});
+
   @override
   Widget build(BuildContext context) {
     game.pauseEngine();
@@ -24,9 +27,7 @@ class GameOverScreen extends StatelessWidget {
               ),
             ),
             Image.asset(Assets.gameOver),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: onRestart,
               style: ElevatedButton.styleFrom(
@@ -36,7 +37,18 @@ class GameOverScreen extends StatelessWidget {
                 'Restart',
                 style: TextStyle(fontSize: 20, color: Colors.white),
               ),
-            )
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: onBackToMenu,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Text(
+                'Main Menu',
+                style: TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
@@ -45,7 +57,13 @@ class GameOverScreen extends StatelessWidget {
 
   void onRestart() {
     game.bird.reset();
-    game.overlays.remove('gameOver');
+    game.overlays.remove(GameOverScreen.id);
     game.resumeEngine();
+  }
+
+  void onBackToMenu() {
+    game.bird.reset();
+    game.overlays.remove(GameOverScreen.id);
+    game.overlays.add(MainMenuScreen.id);
   }
 }

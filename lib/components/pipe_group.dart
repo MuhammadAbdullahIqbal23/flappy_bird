@@ -1,5 +1,3 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:math';
 
 import 'package:flame/components.dart';
@@ -12,7 +10,9 @@ import 'package:flappy_bird/game/pipe_position.dart';
 import 'package:flutter/material.dart';
 
 class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
-  PipeGroup();
+  final Difficulty difficulty;
+
+  PipeGroup({required this.difficulty});
 
   final _random = Random();
 
@@ -20,15 +20,32 @@ class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
   Future<void> onLoad() async {
     position.x = gameRef.size.x;
 
-    final HeightMinusGround = gameRef.size.y - Config.groundHeight;
-    final spacing = 100 + _random.nextDouble() * (HeightMinusGround / 4);
+    final heightMinusGround = gameRef.size.y - Config.groundHeight;
+    double spacing;
+
+    switch (difficulty) {
+      case Difficulty.easy:
+        spacing = 170;
+        break;
+      case Difficulty.medium:
+        spacing = 150 + _random.nextDouble() * 20;
+        break;
+      case Difficulty.hard:
+        spacing = 130 + _random.nextDouble() * 20;
+        break;
+    }
+
     final centerY =
-        spacing + _random.nextDouble() * (HeightMinusGround - spacing);
+        spacing + _random.nextDouble() * (heightMinusGround - spacing);
     addAll([
-      Pipe(height: centerY - spacing / 2, pipePosition: PipePosition.top),
       Pipe(
-          height: HeightMinusGround - (centerY + spacing / 2),
-          pipePosition: PipePosition.bottom),
+        height: centerY - spacing / 2,
+        pipePosition: PipePosition.top,
+      ),
+      Pipe(
+        height: heightMinusGround - (centerY + spacing / 2),
+        pipePosition: PipePosition.bottom,
+      ),
     ]);
   }
 
