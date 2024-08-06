@@ -11,7 +11,13 @@ import 'package:flutter/material.dart';
 class Bird extends SpriteGroupComponent<BirdMovement>
     with HasGameRef<FlappyBirdGame>, CollisionCallbacks {
   Bird();
+  int lives = 3;
+  int lastCounterIncreaseScore = 0;
   int score = 0;
+  bool isInvincible = false;
+  late Timer invincibilityTimer;
+  final double invincibilityDuration = 2.0; // 2 seconds of invincibility
+
   @override
   Future<void> onLoad() async {
     final birdMidFlap = await gameRef.loadSprite(Assets.birdMidFlap);
@@ -27,6 +33,8 @@ class Bird extends SpriteGroupComponent<BirdMovement>
       BirdMovement.down: birddownFlap,
     };
     add(CircleHitbox());
+
+    invincibilityTimer = Timer(invincibilityDuration);
   }
 
   void fly() {
@@ -43,12 +51,53 @@ class Bird extends SpriteGroupComponent<BirdMovement>
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
-    debugPrint('Collision Detected!!!');
-    gameOver();
+    if (!isInvincible) {
+      debugPrint('Collision Detected!!!');
+      if (lives > 0) {
+        lives--;
+        resetPosition();
+        debugPrint('$lives lives left');
+      } else {
+        gameOver();
+      }
+    }
+  }
+
+  void resetPosition() {
+    position = Vector2(50, gameRef.size.y / 2 - size.y / 2);
+    startInvincibility();
+  }
+
+  void startInvincibility() {
+    isInvincible = true;
+    invincibilityTimer.start();
+
+    // Add blinking effect
+    add(
+      OpacityEffect.fadeOut(
+        EffectController(
+          duration: 0.2,
+          alternate: true,
+          infinite: true,
+        ),
+      )..onComplete = () {
+          remove(children.last);
+        },
+    );
+  }
+
+  void endInvincibility() {
+    isInvincible = false;
+    opacity = 1.0; // Ensure full opacity when invincibility ends
+    children.whereType<OpacityEffect>().forEach(remove);
   }
 
   void reset() {
-    position = Vector2(50, gameRef.size.y / 2 - 2 - size.y / 2);
+    resetPosition();
+    lives = 3; // Reset lives when starting a new game
+    score = 0;
+    lastCounterIncreaseScore = 0;
+    endInvincibility();
   }
 
   void gameOver() {
@@ -62,8 +111,26 @@ class Bird extends SpriteGroupComponent<BirdMovement>
   void update(double dt) {
     super.update(dt);
     position.y += Config.birdVelocity * dt;
-    if (position.y < 1) {
-      gameOver();
+
+    invincibilityTimer.update(dt);
+    if (invincibilityTimer.finished) {
+      endInvincibility();
+    }
+
+    // Check if the score is a multiple of 5 and greater than 0
+    if (score > 0 && score % 5 == 0 && score != lastCounterIncreaseScore) {
+      lives++; // Increase lives
+      lastCounterIncreaseScore = score;
+      print('number of lives: $lives');
+    }
+
+    if ((position.y < 1 || position.y > gameRef.size.y) && !isInvincible) {
+      if (lives > 0) {
+        lives--;
+        resetPosition();
+      } else {
+        gameOver();
+      }
     }
   }
 }

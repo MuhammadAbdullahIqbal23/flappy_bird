@@ -11,7 +11,6 @@ class GameOverScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    game.pauseEngine();
     return Material(
       color: Colors.black38,
       child: Center(
@@ -19,7 +18,7 @@ class GameOverScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Score: ${game.bird.score}',
+              'Final Score: ${game.bird.score}',
               style: const TextStyle(
                 fontSize: 60,
                 color: Colors.white,
