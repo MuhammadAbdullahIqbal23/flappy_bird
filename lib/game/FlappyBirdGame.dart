@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -5,6 +7,7 @@ import 'package:flappy_bird/components/background.dart';
 import 'package:flappy_bird/components/bird.dart';
 import 'package:flappy_bird/components/ground.dart';
 import 'package:flappy_bird/components/pipe_group.dart';
+import 'package:flappy_bird/components/power_up.dart';
 import 'package:flappy_bird/game/configuration.dart';
 import 'package:flappy_bird/screens/main_menu_screen.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +22,9 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
   bool isHit = false;
   Difficulty difficulty = Difficulty.easy;
   int lastLifeAdded = 0;
+  int pipeCount = 0;
+  Timer powerUpTimer = Timer(10, repeat: true);
+  var random = Random();
 
   @override
   Future<void> onLoad() async {
@@ -31,6 +37,7 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
     ]);
     interval.onTick = () => add(PipeGroup(difficulty: difficulty));
     overlays.add(MainMenuScreen.id);
+    powerUpTimer.onTick = spawnPowerUp;
   }
 
   @override
@@ -43,6 +50,9 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
   void update(double dt) {
     super.update(dt);
     interval.update(dt);
+    if (interval.finished) {
+      interval.reset();
+    }
     score.text = 'Score: ${bird.score}';
     livesDisplay.text = 'Lives: ${bird.lives}';
 
@@ -56,6 +66,8 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
     // Add a life every 5 points
     if (bird.score > 0 && bird.score % 5 == 0 && bird.score != lastLifeAdded) {
       bird.lives++;
+      bird.lives = bird.lives - 1;
+      debugPrint('Added a life');
       lastLifeAdded = bird.score;
     }
 
@@ -65,6 +77,12 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
       overlays.add('gameOver');
       pauseEngine();
     }
+    powerUpTimer.update(dt);
+  }
+
+  void spawnPowerUp() {
+    final powerUpY = random.nextDouble() * (size.y - Config.groundHeight - 30);
+    add(PowerUp(position: Vector2(size.x, powerUpY)));
   }
 
   TextComponent buildScore() {

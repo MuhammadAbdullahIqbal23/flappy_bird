@@ -20,4 +20,6 @@ class Assets {
   static const point = 'point.wav';
 
   static const life = 'heart.png';
+
+  static const powerUp = 'power_up.png';
 }

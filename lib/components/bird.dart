@@ -11,12 +11,14 @@ import 'package:flutter/material.dart';
 class Bird extends SpriteGroupComponent<BirdMovement>
     with HasGameRef<FlappyBirdGame>, CollisionCallbacks {
   Bird();
-  int lives = 3;
+  int lives = 1;
   int lastCounterIncreaseScore = 0;
   int score = 0;
   bool isInvincible = false;
   late Timer invincibilityTimer;
-  final double invincibilityDuration = 2.0; // 2 seconds of invincibility
+  final double normalInvincibilityDuration = 2.0;
+  final double powerUpInvincibilityDuration = 5.0;
+  int lastPowerUpScore = 0;
 
   @override
   Future<void> onLoad() async {
@@ -34,7 +36,7 @@ class Bird extends SpriteGroupComponent<BirdMovement>
     };
     add(CircleHitbox());
 
-    invincibilityTimer = Timer(invincibilityDuration);
+    invincibilityTimer = Timer(normalInvincibilityDuration);
   }
 
   void fly() {
@@ -63,13 +65,22 @@ class Bird extends SpriteGroupComponent<BirdMovement>
     }
   }
 
-  void resetPosition() {
-    position = Vector2(50, gameRef.size.y / 2 - size.y / 2);
-    startInvincibility();
+  void activatePowerUp() {
+    startInvincibility(powerUpInvincibilityDuration);
+    print('Power-up invincibility activated for 5 seconds!');
+    // You might want to add a special sound effect here
+    // FlameAudio.play(Assets.powerUp);
   }
 
-  void startInvincibility() {
+  void resetPosition() {
+    position = Vector2(50, gameRef.size.y / 2 - size.y / 2);
+    startInvincibility(normalInvincibilityDuration);
+  }
+
+  void startInvincibility(double duration) {
     isInvincible = true;
+    invincibilityTimer.stop();
+    invincibilityTimer = Timer(duration);
     invincibilityTimer.start();
 
     // Add blinking effect
@@ -94,9 +105,10 @@ class Bird extends SpriteGroupComponent<BirdMovement>
 
   void reset() {
     resetPosition();
-    lives = 3; // Reset lives when starting a new game
+    lives = 1;
     score = 0;
     lastCounterIncreaseScore = 0;
+    lastPowerUpScore = 0;
     endInvincibility();
   }
 
@@ -117,11 +129,25 @@ class Bird extends SpriteGroupComponent<BirdMovement>
       endInvincibility();
     }
 
-    // Check if the score is a multiple of 5 and greater than 0
-    if (score > 0 && score % 5 == 0 && score != lastCounterIncreaseScore) {
-      lives++; // Increase lives
+    // Check for score-based events
+    if (score > lastCounterIncreaseScore) {
+      // Check for power-up invincibility at multiples of 15
+      if (score % 15 == 0 && score > lastPowerUpScore) {
+        startInvincibility(powerUpInvincibilityDuration);
+        lastPowerUpScore = score;
+        print(
+            'Power-up invincibility activated for 5 seconds at score $score!');
+        // You might want to add a special sound effect here
+        // FlameAudio.play(Assets.powerUp);
+      }
+
+      // Check for life increase every 5 points
+      if (score % 5 == 0) {
+        lives++;
+        print('number of lives: $lives');
+      }
+
       lastCounterIncreaseScore = score;
-      print('number of lives: $lives');
     }
 
     if ((position.y < 1 || position.y > gameRef.size.y) && !isInvincible) {
